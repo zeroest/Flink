@@ -1,12 +1,14 @@
 
 # [Architecture](https://nightlies.apache.org/flink/flink-docs-master/docs/concepts/flink-architecture/)
 
+[번역](https://moonsub-kim.github.io/docs/flink/flink-overview/architecture-clusters/)
+
 - [[Confluent] Flink Concepts](https://docs.confluent.io/platform/current/flink/concepts/architecture.html)
 - [Apache Flink Ecosystem Components](https://data-flair.training/blogs/apache-flink-ecosystem-components/)
 
 ## Cluster Architecture
 
-![Flink cluster Architecture](./img/cluster_architecture.svg)
+![Flink cluster Architecture](cluster_architecture.svg)
 
 ### Job Manager
 
@@ -21,13 +23,13 @@
 
 ## Stack
 
-![Flink Stack](./img/flink-stack.png)
+![Flink Stack](flink-stack.png)
 [refer](https://nightlies.apache.org/flink/flink-docs-release-1.0/)
 
 
 ## Flink API
 
-![Flink APIs](./img/flink-APIs.png)
+![Flink APIs](flink-APIs.png)
 
 /|  
 &nbsp;| Conciseness  

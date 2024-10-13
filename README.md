@@ -69,8 +69,7 @@ Persisted savepoint
   - HDFS, S3 등에 저장
   - Flink 업그레이드, 코드 변경 등의 작업 시 사용자가 직접 활용
 
+---
 
-
-
-
+[Apache Flink Series](https://medium.com/@akash.d.goel/apache-flink-series-part-2-a3330d62ce63)
 
