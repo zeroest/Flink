@@ -145,7 +145,7 @@ workerIPAddrX
 ./bin/stop-cluster.sh
 
 # 단일 Job Manager를 클러스터에 참여시킨다
-./bin/jobmanager.sh start cluster
+./bin/jobmanager.sh start cluster --host jm0x
 # 단일 Job Manager를 클러스터에서 제외시킨다
 ./bin/jobmanager.sh stop cluster
 
@@ -166,3 +166,61 @@ Flink 클러스터를 구성할 때 Zookeeper는 고가용성과 리더 선출�
 Failover 관리: Zookeeper는 클러스터 내에서 JobManager의 상태를 지속적으로 감시하고, 장애가 발생하면 이를 감지하여 Failover 메커니즘을 통해 클러스터의 지속적인 운영을 보장합니다.
 
 따라서, Flink 클러스터가 고가용성 모드로 운영될 때, Zookeeper는 리더 선출과 상태 저장을 통해 클러스터의 안정성과 연속성을 보장하는 중요한 역할을 수행합니다.
+
+---
+
+## Trouble shoot
+
+### 1. Blob Server connection refuse
+
+#### 상황
+
+Job submit 이후 Blob Server connection refuse 발생
+
+#### 원인
+
+~~기본 설정인 `blob.server.port`가 0으로 설정되어 랜덤 포트로 개방~~
+
+~~Job Manager가 HA 구성으로 되어 있어 리더 서버의 Blob Server Port를 찾지 못함~~
+
+~~[[doc] Configuration - Blob Server](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/deployment/config/#blob-server)~~
+
+#### 해결
+
+~~Job Manager 서버 설정에 Blob Server Port 설정~~
+
+```yaml
+blob.server.port: 6666
+```
+
+### 2.Job Manager 조인시 잘못된 hostname 입력
+
+#### 상황 
+
+Job Manager failover 테스트중 발생
+
+1. jm01이 리더 상황에서 jm01 Job Manager 다운
+2. jm02가 리더로 정상적으로 failover
+  - zkCli.sh - get /flink/zero/leader/resource_manager/connection_info
+3. jm01 `./bin/jobmanager.sh start cluster` 클러스터 조인
+4. jm02 Job Manager 다운
+5. 리더 선출 조회시 `tcp://flink@cluster:42269/user/rpc/resourcemanager_0` 와 같이 잘못된 hostname 반영
+  - zkCli.sh - get /flink/zero/leader/resource_manager/connection_info
+
+#### 원인
+
+Job Manager가 cluster 조인시 잘못된 hostname으로 조인 
+
+```log
+2024-10-13 16:30:13,341 INFO  org.apache.flink.runtime.entrypoint.ClusterEntrypoint        [] -     --executionMode
+2024-10-13 16:30:13,341 INFO  org.apache.flink.runtime.entrypoint.ClusterEntrypoint        [] -     cluster                                                                       2024-10-13 16:30:13,342 INFO  org.apache.flink.runtime.entrypoint.ClusterEntrypoint        [] -     --host
+2024-10-13 16:30:13,342 INFO  org.apache.flink.runtime.entrypoint.ClusterEntrypoint        [] -     cluster
+```
+
+#### 해결
+
+아래와 같이 `--host` 파라미터를 추가하여 정상적인 hostname을 전달한다
+
+```shell
+./bin/jobmanager.sh start cluster --host jm0x
+```
