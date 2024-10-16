@@ -80,9 +80,37 @@ cd flink-training/click-analysis-job
 mvn clean package
 
 sftp flink@jm01:/home/flink <<< $'put /home/ubuntu/flink-training/click-analysis-job/target/click-analysis-job-1.0-SNAPSHOT.jar'
+```
 
+## Flink job controll
+
+https://nightlies.apache.org/flink/flink-docs-master/docs/ops/state/savepoints/
+
+### Job Run
+
+```shell
 /home/flink/flink/flk/bin/flink run -d ~/click-analysis-job-1.0-SNAPSHOT.jar --bootstrap.servers inf01:9094 --checkpointing --event-time
 ```
+
+### Job Stop
+
+```shell
+# /home/flink/flink/flk/bin/flink stop --savepointPath file://path/to/savepoints 36193e20fe84623f13da45e695c16032
+/home/flink/flink/flk/bin/flink stop 36193e20fe84623f13da45e695c16032
+
+Suspending job "36193e20fe84623f13da45e695c16032" with a CANONICAL savepoint.
+Triggering stop-with-savepoint for job 36193e20fe84623f13da45e695c16032.
+Waiting for response...
+Savepoint completed. Path: s3://zero-flink/savepoints/savepoint-36193e-909fe70c060d
+```
+
+### Job Resume
+
+```shell
+/home/flink/flink/flk/bin/flink run -d -s s3://zero-flink/savepoints/savepoint-36193e-909fe70c060d ~/click-analysis-job-1.0-SNAPSHOT.jar
+```
+
+## Monitoring
 
 ### Kafka source sink 확인
 
