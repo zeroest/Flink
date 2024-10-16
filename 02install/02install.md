@@ -115,8 +115,8 @@ mkdir $FLINK_HOME/plugins/s3-fs-presto
 cp $FLINK_HOME/opt/flink-s3-fs-presto-*.jar $FLINK_HOME/plugins/s3-fs-presto
 ```
 
-- [Job Manager Config](./config.yaml.jobmanager)
-- [Task Manager Config](./config.yaml.taskmanager)
+- [Job Manager Config](./config.jobmanager.yaml)
+- [Task Manager Config](./config.taskmanager.yaml)
 
 ### Add masters and workers on job manager server
 
