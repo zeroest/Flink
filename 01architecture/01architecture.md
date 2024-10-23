@@ -5,6 +5,7 @@
 
 - [[Confluent] Flink Concepts](https://docs.confluent.io/platform/current/flink/concepts/architecture.html)
 - [Apache Flink Ecosystem Components](https://data-flair.training/blogs/apache-flink-ecosystem-components/)
+- [Apache Flink Series - Part 1](https://medium.com/@akash.d.goel/apache-flink-series-part-1-15795a184963)
 
 ## Cluster Architecture
 

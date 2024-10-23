@@ -40,8 +40,8 @@ flowchart TD
     end
 
     JobManager <--RPC--> TaskManager
-    JobManager <--leader 선출\nleader 주소 정보 저장--> Zookeeper
-    TaskManager <--Resource Manager에 Task Manager 등록\nJob Manager leader fail 시 노티받아 failover--> Zookeeper
+    JobManager <--leader 선출/leader 주소 정보 저장--> Zookeeper
+    TaskManager <--Resource Manager에 Task Manager 등록/Job Manager leader fail 시 노티받아 failover--> Zookeeper
 ```
 
 ## Install

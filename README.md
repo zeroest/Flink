@@ -1,8 +1,7 @@
 
 # Apache Flink
 
-Stateful Computations over Data Streams
-Apache Flink is a framework and distributed processing engine for stateful computations over unbounded and bounded data streams. Flink has been designed to run in all common cluster environments, perform computations at in-memory speed and at any scale.
+> Apache Flink is a framework and distributed processing engine for stateful computations over unbounded and bounded data streams. Flink has been designed to run in all common cluster environments, perform computations at in-memory speed and at any scale.
 
 - stateful computations
 - over unbounded and bounded
@@ -10,6 +9,7 @@ Apache Flink is a framework and distributed processing engine for stateful compu
   - Unbounded - Streaming analytics
 - perform computations at in-memory speed and at any scale
 
+![Flink Batch, Streaming analytics](./img/batch-stream-analytics.png)
 
 ## 특장점
 
@@ -40,7 +40,9 @@ Apache Flink is a framework and distributed processing engine for stateful compu
 
 ## Stateful Stream Processing
 
-distributed processing engine for stateful computations
+> distributed processing engine for stateful computations
+
+상태가 있는 연산을 하기 위한 분산처리 엔진 
 
 ### State Stream Processing 케이스
 
@@ -71,5 +73,6 @@ Persisted savepoint
 
 ---
 
-[Apache Flink Series](https://medium.com/@akash.d.goel/apache-flink-series-part-2-a3330d62ce63)
+# [Apache Flink - Use Cases](https://flink.apache.org/what-is-flink/use-cases/)
+
 
