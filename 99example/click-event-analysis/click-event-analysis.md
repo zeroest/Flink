@@ -1,58 +1,40 @@
 
-# Example Project
+# Click Event Analysis
 
-## Docker install
+## 구성도
 
-```shell
-#!/bin/bash
+```mermaid
+flowchart LR
+    mysql[MySQL]
+    kafka[Kafka]
+    grafana[Grafana]
+    prometheus[Prometheus]
+    zookeeper[Zookeeper]
+    ceg[ClickEventGenerator]
 
-# Add Docker's official GPG key:
-sudo apt-get update
-sudo apt-get install ca-certificates curl
-sudo install -m 0755 -d /etc/apt/keyrings
-sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-sudo chmod a+r /etc/apt/keyrings/docker.asc
+    subgraph Infra
+        zookeeper
+        kafka
+        grafana
+        prometheus
+        mysql
+        ceg
+    end
 
-# Add the repository to Apt sources:
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-sudo apt-get update
+    jm[JobManager]
+    tm[TaskManager]
 
-# sudo snap install docker
-sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    subgraph Flink
+        jm
+        tm
+    end
 
-# sudo addgroup --system docker
-sudo adduser $USER docker
-# newgrp docker
-# sudo snap disable docker
-# sudo snap enable docker
+    jm ---- tm
 
-# Install docker-compose
-sudo curl -L https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
-```
-
-## Project clone
-
-```shell
-git clone https://github.com/haemee/flink-training.git
-```
-
-## Project Infra
-
-- zookeeper
-- kafka
-- mysql
-- prometheus
-- grafana
-
-```shell
-cd flink-training/operations-playground
-docker-compose build
-chmod 777 grafana
-docker-compose up -d
+    ceg -- 01 Click Event 발행 --> kafka
+    kafka -- 02 Click Event Consume --> tm
+    tm -- 03 집계 내역 발행 --> kafka
+    tm -- 03 집계 내역 저장 --> mysql
 ```
 
 ## Set Up

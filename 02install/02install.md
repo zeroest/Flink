@@ -1,10 +1,10 @@
 
 # Install
 
-[Install Apache Flink on Multi-node Cluster: RHE8](https://www.linkedin.com/pulse/install-apache-flink-multi-node-cluster-rhe8-shanoj-kumar-v/)
-[[Flink Doc] Zookeeper HA Services](https://nightlies.apache.org/flink/flink-docs-master/docs/deployment/ha/zookeeper_ha/)
-[[haemee] flink-training](https://github.com/haemee/flink-training)
-[Setting Up a High-Availability Apache Flink Cluster with ZooKeeper](https://jainsaket-1994.medium.com/setting-up-a-high-availability-apache-flink-cluster-with-zookeeper-64edb66f625c)
+- [Install Apache Flink on Multi-node Cluster: RHE8](https://www.linkedin.com/pulse/install-apache-flink-multi-node-cluster-rhe8-shanoj-kumar-v/)
+- [[Flink Doc] Zookeeper HA Services](https://nightlies.apache.org/flink/flink-docs-master/docs/deployment/ha/zookeeper_ha/)
+- [[haemee] flink-training](https://github.com/haemee/flink-training)
+- [Setting Up a High-Availability Apache Flink Cluster with ZooKeeper](https://jainsaket-1994.medium.com/setting-up-a-high-availability-apache-flink-cluster-with-zookeeper-64edb66f625c)
 
 ## 구성도
 
@@ -42,6 +42,12 @@ flowchart TD
     JobManager <--RPC--> TaskManager
     JobManager <--leader 선출/leader 주소 정보 저장--> Zookeeper
     TaskManager <--Resource Manager에 Task Manager 등록/Job Manager leader fail 시 노티받아 failover--> Zookeeper
+
+    inf01[inf01]
+    
+    subgraph Infra
+      inf01
+    end
 ```
 
 ## Install
@@ -179,15 +185,15 @@ Job submit 이후 Blob Server connection refuse 발생
 
 #### 원인
 
-~~기본 설정인 `blob.server.port`가 0으로 설정되어 랜덤 포트로 개방~~
+기본 설정인 `blob.server.port`가 0으로 설정되어 랜덤 포트로 개방
 
-~~Job Manager가 HA 구성으로 되어 있어 리더 서버의 Blob Server Port를 찾지 못함~~
+Job Manager가 HA 구성으로 되어 있어 리더 서버의 Blob Server Port를 찾지 못함
 
-~~[[doc] Configuration - Blob Server](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/deployment/config/#blob-server)~~
+[[doc] Configuration - Blob Server](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/deployment/config/#blob-server)
 
 #### 해결
 
-~~Job Manager 서버 설정에 Blob Server Port 설정~~
+Job Manager 서버 설정에 Blob Server Port 설정
 
 ```yaml
 blob.server.port: 6666
