@@ -1,6 +1,5 @@
 package org.example.clickanalysis;
 
-import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.connector.base.DeliveryGuarantee;
@@ -11,12 +10,6 @@ import org.apache.flink.connector.kafka.sink.KafkaRecordSerializationSchema;
 import org.apache.flink.connector.kafka.sink.KafkaSink;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
-import org.example.clickanalysis.functions.ClickEventStatisticsCollector;
-import org.example.clickanalysis.functions.CountingAggregator;
-import org.example.clickanalysis.records.ClickEvent;
-import org.example.clickanalysis.records.ClickEventDeserializationSchema;
-import org.example.clickanalysis.records.ClickEventStatistics;
-import org.example.clickanalysis.records.ClickEventStatisticsSerializationSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
@@ -24,9 +17,15 @@ import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTime
 import org.apache.flink.streaming.api.windowing.assigners.WindowAssigner;
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
-
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.OffsetResetStrategy;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.example.clickanalysis.functions.ClickEventStatisticsCollector;
+import org.example.clickanalysis.functions.CountingAggregator;
+import org.example.clickanalysis.records.ClickEvent;
+import org.example.clickanalysis.records.ClickEventDeserializationSchema;
+import org.example.clickanalysis.records.ClickEventStatistics;
+import org.example.clickanalysis.records.ClickEventStatisticsSerializationSchema;
 
 import java.text.SimpleDateFormat;
 import java.time.Duration;
@@ -60,8 +59,12 @@ public class ClickEventAnalyzer {
     KafkaSource<ClickEvent> source = KafkaSource.<ClickEvent>builder()
       .setProperties(kafkaProps)
       .setTopics(inputTopic)
+//      .setTopics("input-1", "input-2")
+//      .setTopicPattern("input.*")
+//      .setPartitions(new HashSet<>(Arrays.asList(new TopicPartition("input-1", 0), new TopicPartition("input-2", 5))))
       .setValueOnlyDeserializer(new ClickEventDeserializationSchema())
-      .setStartingOffsets(OffsetsInitializer.earliest())
+//      .setValueOnlyDeserializer(new SimpleStringSchema())
+      .setStartingOffsets(OffsetsInitializer.committedOffsets(OffsetResetStrategy.EARLIEST))
       .build();
 
     WatermarkStrategy<ClickEvent> watermarkStrategy = WatermarkStrategy
