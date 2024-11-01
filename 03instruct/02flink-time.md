@@ -28,6 +28,10 @@ Flink 에서는 시간을 두 종류의 시간을 사용함
   - 이벤트가 늦게 도착하거나, 순서가 뒤섞여서 도착하더라도 이론적으로는 동일한 연산 결과를 보장
   - 데이터 재처리 시에도 동일한 연산 결과 보장
   - ~~늦게 도착하는 이벤트를 언제까지 기다릴 것인가?~~
+- Event Time 기반 Data Processing 시 해결해야 할 문제 ([Watermark로 해결](./03watermark.md))
+  - Event Time 을 기준으로 데이터를 처리할 때, Event Time이 얼마나 흘렀는지 어떻게 판단할 것인가
+    - ex) 1시간 단위 windowing 경우, 어떻게 1시간이 흘렀는지 판단하고 window를 닫을 것인가
+  - Event Time은 데이터를 처리하는 시스템의 시간과는 별개로 결정되기 때문에 어려운 문제
 
 ![img.png](img/processing-vs-event.png)
 
