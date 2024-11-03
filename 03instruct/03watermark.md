@@ -170,3 +170,28 @@ public interface WatermarkGenerator<T> {
   void onPeriodicEmit(WatermarkOutput output);
 }
 ```
+
+## [Dealing With Idle Sources](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/dev/datastream/event-time/generating_watermarks/#dealing-with-idle-sources)
+
+- Idle Source, 이벤트가 흐르지 않는 소스가 있다는건 다른 데이터 소스에서 많은 이벤트를 받아도 전체로 본다면 흐르지 않는것과 같다
+  - 여러 개의 watermark 가 들어오는 경우, operator의 event time은 min 값으로 설정됨
+  - 이때 일부 토픽에서 이벤트가 들어오지 않는다면 워터마크가 생성되지 않고 흐르지 않게 됨
+  - 워터마크가 더이상 흐르지 않기 때문에 min 값의 워터마크가 고정, 즉 timestamp가 업데이트 되지 않음
+  - 윈도우는 닫히지 않고 뒤에 연결되는 다운스트림에도 결과를 내보내지 않음, 즉 전체 스트림에 데이터가 흐르지 않게 된다 
+- 이를 방지하기 위해 설정 
+  - (withIdleness(Duration.ofSeconds(5))) - 소스에 이벤트가 흐르지 않는 시간이 5초 이상 된다면
+  - 소스는 아이들 상태로 판단하여 해당 소스에서 워터마크가 오지 않더라도 무시하도록 처리
+
+> If one of the input splits/partitions/shards does not carry events for a while this means that the WatermarkGenerator also does not get any new information on which to base a watermark. We call this an idle input or an idle source. This is a problem because it can happen that some of your partitions do still carry events. In that case, the watermark will be held back, because it is computed as the minimum over all the different parallel watermarks.
+
+입력 분할/파티션/샤드 중 하나가 한동안 이벤트를 전달하지 않는다면 이는 워터마크 생성기가 워터마크의 기반이 될 새로운 정보를 얻지 못한다는 것을 의미합니다. 이를 유휴 입력 또는 유휴 소스라고 부릅니다. 이는 일부 파티션에 여전히 이벤트가 남아 있을 수 있기 때문에 문제가 됩니다. 이 경우 워터마크는 모든 다른 병렬 워터마크에 대해 최소값으로 계산되기 때문에 보류됩니다.
+
+> To deal with this, you can use a WatermarkStrategy that will detect idleness and mark an input as idle. WatermarkStrategy provides a convenience helper for this:
+
+이 문제를 해결하기 위해 유휴 상태를 감지하고 입력을 유휴 상태로 표시하는 WatermarkStrategy를 사용할 수 있습니다. 워터마크전략은 이를 위한 편리한 도우미를 제공합니다:
+
+```
+WatermarkStrategy
+        .<Tuple2<Long, String>>forBoundedOutOfOrderness(Duration.ofSeconds(20))
+        .withIdleness(Duration.ofMinutes(1));
+```
