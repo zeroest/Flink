@@ -375,8 +375,11 @@ cluster.evenly-spread-out-slots: true
 #==============================================================================
 
 metrics:
-  reporter: prom
-  reporter.prom.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
+  reporters: prom
+  reporter:
+    prom:
+      factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
+      port: 9250-9260 # default 9249
   job.status.enable: CURRENT_TIME
   system-resource: true
   system-resource-probing-interval: 10000
