@@ -5,7 +5,7 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.annotation.JsonFor
 import java.util.Date;
 import java.util.Objects;
 
-public class ClickEvent {
+public class ClickEvent implements WatermarkMarkerEvent {
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss:SSS")
   private Date timestamp;
   private String page;
@@ -58,5 +58,15 @@ public class ClickEvent {
     sb.append(", page='").append(page).append('\'');
     sb.append('}');
     return sb.toString();
+  }
+
+  @Override
+  public boolean hasWatermarkMarker() {
+    return Objects.nonNull(this.timestamp);
+  }
+
+  @Override
+  public long getWatermarkTimestamp() {
+    return this.timestamp.getTime();
   }
 }

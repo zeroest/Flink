@@ -54,3 +54,119 @@ Event time은 새로 생성된 스트림 요소(또는 요소들)를 생성한 �
 아래 그림은 병렬 스트림을 통해 흐르는 이벤트와 워터마크, 그리고 이벤트 시간을 추적하는 operator의 예를 보여줍니다.
 
 ![watermark in parallel streams](img/watermark-in-parallel-streams.png)
+
+## [Watermark Strategies](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/dev/datastream/event-time/generating_watermarks/#introduction-to-watermark-strategies)
+
+### Event Time 설정 하기
+
+- Event time 기준으로 stream processing을 하기 위해 event timestamp를 Flink에 등록해줘야 함
+- 이벤트의 특정 필드에서 시간을 추출해서 전달
+- [TimestampAssigner 사용](../99example/click-event-analysis/click-analysis-job/src/main/java/org/example/clickanalysis/ClickEventAnalyzer.java)
+
+```
+    WatermarkStrategy<ClickEvent> watermarkStrategy = WatermarkStrategy
+      .<ClickEvent>forBoundedOutOfOrderness(Duration.ofMillis(200))
+      .withIdleness(Duration.ofSeconds(5))
+      .withTimestampAssigner((clickEvent, l) -> clickEvent.getTimestamp().getTime());
+```
+
+### Watermark 생성하기
+
+- Event time 등록과 함께, watermark 생성 필요
+- Stream 내에서 event time의 흐름을 알려주기 위함
+- WatermarkGenerator 사용
+  - 일반적으로 사용되는 watermark strategy는 static method로 제공
+- Built-in Watermark Generator
+- auto watermark generation interval
+
+> The Flink API expects a WatermarkStrategy that contains both a TimestampAssigner and WatermarkGenerator. A number of common strategies are available out of the box as static methods on WatermarkStrategy, but users can also build their own strategies when required.
+
+Flink API는 타임스탬프 할당자와 워터마크 생성기를 모두 포함하는 워터마크 전략을 기대합니다. 여러 가지 일반적인 전략이 워터마크전략에서 정적 메서드로 즉시 사용 가능하지만, 필요에 따라 사용자가 직접 전략을 구축할 수도 있습니다.
+
+```java
+public interface WatermarkStrategy<T> 
+    extends TimestampAssignerSupplier<T>,
+            WatermarkGeneratorSupplier<T>{
+
+    /**
+     * Instantiates a {@link TimestampAssigner} for assigning timestamps according to this
+     * strategy.
+     */
+    @Override
+    TimestampAssigner<T> createTimestampAssigner(TimestampAssignerSupplier.Context context);
+
+    /**
+     * Instantiates a WatermarkGenerator that generates watermarks according to this strategy.
+     */
+    @Override
+    WatermarkGenerator<T> createWatermarkGenerator(WatermarkGeneratorSupplier.Context context);
+}
+```
+
+> As mentioned, you usually don’t implement this interface yourself but use the static helper methods on WatermarkStrategy for common watermark strategies or to bundle together a custom TimestampAssigner with a WatermarkGenerator. For example, to use bounded-out-of-orderness watermarks and a lambda function as a timestamp assigner you use this:
+
+앞서 언급했듯이 일반적으로 이 인터페이스를 직접 구현하지 않고 일반적인 워터마크 전략을 위해 WatermarkStrategy의 정적 헬퍼 메서드를 사용하거나 사용자 정의 타임스탬프 할당자와 워터마크 생성기를 함께 번들링합니다. 예를 들어 bounded-out-of-orderness 워터마크와 람다 함수를 타임스탬프 할당자로 사용하려면 이 인터페이스를 사용합니다:
+
+```
+WatermarkStrategy
+        .<Tuple2<Long, String>>forBoundedOutOfOrderness(Duration.ofSeconds(20))
+        .withTimestampAssigner((event, timestamp) -> event.f0);
+```
+
+> Specifying a TimestampAssigner is optional and in most cases you don’t actually want to specify one. For example, when using Kafka or Kinesis you would get timestamps directly from the Kafka/Kinesis records.
+
+타임스탬프 할당자를 지정하는 것은 선택 사항이며, 대부분의 경우 실제로 지정하지 않는 것이 좋습니다. 예를 들어, 카프카나 키네시스를 사용할 때는 카프카/키네시스 레코드에서 직접 타임스탬프를 가져옵니다.
+
+### [Built-in Watermark Generators](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/dev/datastream/event-time/built_in/#builtin-watermark-generators)
+
+#### Monotonously Increasing Timestamps
+
+- 현재 timestamp를 watermark로 사용
+- 이상적인 경우, 타임스탬프가 증가하기만 하는 경우
+
+`WatermarkStrategy.forMonotonousTimestamps();`
+
+#### Fixed Amount of Lateness
+
+- Max timestamp - event의 최대 지연 시간을 워터마크로 사용
+- 현재까지 들어온 이벤트 중 가장 큰 타임스탬프에서 지정한 특정 시간(Duration.ofSeconds(10))을 빼고 워터마크 지정
+- 특정시간: 이벤트가 늦게 들어올거라는 가정하에 설정, 즉 최대 지연시간을 설정한다
+
+`WatermarkStrategy.forBoundedOutOfOrderness(Duration.ofSeconds(10));`
+
+## [Writing WatermarkGenerators](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/dev/datastream/event-time/generating_watermarks/#writing-watermarkgenerators)
+
+- [onEvent 구현 예제](../99example/click-event-analysis/click-analysis-job/src/main/java/org/example/clickanalysis/watermark/PunctuatedAssigner.java)
+- [onPeriodicEmit 구현 예제](../99example/click-event-analysis/click-analysis-job/src/main/java/org/example/clickanalysis/watermark/TimeLagWatermarkGenerator.java)
+
+```java
+/**
+ * The {@code WatermarkGenerator} generates watermarks either based on events or
+ * periodically (in a fixed interval).
+ * 이 워터마크 생성기는 이벤트에 따라 또는 주기적으로(고정된 간격으로) 워터마크를 생성합니다.
+ *
+ * <p><b>Note:</b> This WatermarkGenerator subsumes the previous distinction between the
+ * {@code AssignerWithPunctuatedWatermarks} and the {@code AssignerWithPeriodicWatermarks}.
+ */
+@Public
+public interface WatermarkGenerator<T> {
+
+  /**
+   * Called for every event, allows the watermark generator to examine 
+   * and remember the event timestamps, or to emit a watermark based on
+   * the event itself.
+   * 모든 이벤트에 대해 호출되며, 워터마크 생성기가 이벤트 타임스탬프를 검사하고 기억하거나 이벤트 자체를 기반으로 워터마크를 생성할 수 있도록 합니다.
+   */
+  void onEvent(T event, long eventTimestamp, WatermarkOutput output);
+
+  /**
+   * Called periodically, and might emit a new watermark, or not.
+   * 주기적으로 호출되며 새 워터마크를 생성하거나 생성하지 않을 수 있습니다.
+   *
+   * <p>The interval in which this method is called and Watermarks 
+   * are generated depends on {@link ExecutionConfig#getAutoWatermarkInterval()}.
+   * 이 메서드가 호출되고 워터마크가 생성되는 간격은 {@link ExecutionConfig#getAutoWatermarkInterval()}에 따라 달라집니다 (default 200ms)
+   */
+  void onPeriodicEmit(WatermarkOutput output);
+}
+```

@@ -36,5 +36,3 @@ Flink 에서는 시간을 두 종류의 시간을 사용함
 ![img.png](img/processing-vs-event.png)
 
 [Stream Processing 101](https://largecats.github.io/blog/2021/06/10/stream-processing-101/)
-
-

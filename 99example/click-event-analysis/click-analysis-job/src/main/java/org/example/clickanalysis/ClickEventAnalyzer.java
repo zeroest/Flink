@@ -43,6 +43,8 @@ public class ClickEventAnalyzer {
     final ParameterTool params = ParameterTool.fromArgs(args);
 
     final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+    // auto watermark interval - onPeriodicEmit
+//    env.getConfig().setAutoWatermarkInterval(1000);
 
     configureEnvironment(params, env);
 
