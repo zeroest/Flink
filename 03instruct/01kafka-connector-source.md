@@ -1,5 +1,5 @@
 
-# [Kafka Connector Source](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/connectors/datastream/kafka/)
+# [Kafka Connector Source](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/connectors/datastream/kafka/#kafka-source)
 
 ## [Kafka Offset](https://nightlies.apache.org/flink/flink-docs-release-1.20/docs/connectors/datastream/kafka/#starting-offset)
 
@@ -42,3 +42,7 @@ KafkaSource has following options for configuration:
   - Flink 메트릭 그룹에 KafkaConsumer의 메트릭을 등록할지 여부를 지정합니다.
 - commit.offsets.on.checkpoint: specifies whether to commit consuming offsets to Kafka brokers on checkpoint
   - 체크포인트에서 소비 오프셋을 Kafka 브로커에 커밋할지 여부를 지정합니다.
+
+# Reference
+
+- [Flink Concept - Flink의 Kafka Consumer 동작 방식(1)](https://leeyh0216.github.io/posts/flink_kafka_consumer_works_1/)
